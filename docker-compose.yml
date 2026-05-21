@@ -1,0 +1,79 @@
+# version: '3.9'  # Opcional en Compose v2, la puedes dejar comentada
+services:
+  # PostgreSQL - Transactional database (Orders, Products)
+  postgres:
+    image: postgres:17
+    container_name: erp-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/postgresql:/docker-entrypoint-initdb.d
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB - Document database (Catalogs, AuditLogs, Product Queries)
+  mongodb:
+    image: mongo:8
+    container_name: erp-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./db/mongodb:/docker-entrypoint-initdb.d
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "-u", "${MONGO_ROOT_USERNAME}", "-p", "${MONGO_ROOT_PASSWORD}", "--authenticationDatabase", "admin", "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Redis - Catalog cache
+  redis:
+    image: redis:7
+    container_name: erp-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory ${REDIS_MAX_MEMORY} --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    networks:
+      - erp-vpc
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  #ADD in next class
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    container_name: redis-ui
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:${REDIS_PASSWORD}
+      - HTTP_USER=${REDIS_UI_USER}
+      - HTTP_PASSWORD=${REDIS_UI_PASSWORD}
+    ports:
+      - "${REDIS_UI_PORT}:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - erp-vpc
+
+networks:
+  erp-vpc:
+    driver: bridge
