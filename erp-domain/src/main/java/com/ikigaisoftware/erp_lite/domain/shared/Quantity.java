@@ -10,7 +10,7 @@ public record Quantity(Integer value) {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
         if (value <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than 0, got: " + value);
+            throw new IllegalArgumentException("Quantity must be greater than 0");
         }
     }
 

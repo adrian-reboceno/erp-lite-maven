@@ -9,7 +9,7 @@ public record Stock(Integer value) {
             throw new IllegalArgumentException("Stock cannot be null");
         }
         if (value < 0) {
-            throw new IllegalArgumentException("Stock cannot be negative, got: " + value);
+            throw new IllegalArgumentException("Stock cannot be negative");
         }
     }
 
@@ -22,21 +22,21 @@ public record Stock(Integer value) {
     }
 
     public Stock increment(int quantity) {
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Increment quantity must be positive, got: " + quantity);
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Increment quantity cannot be negative");
         }
-        return new Stock(value + quantity);
+        return new Stock(this.value + quantity);
     }
 
     public Stock decrement(int quantity) {
-        if (quantity <= 0) {
-            throw new IllegalArgumentException("Decrement quantity must be positive, got: " + quantity);
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Decrement quantity cannot be negative");
         }
-        if (value - quantity < 0) {
-            throw new IllegalArgumentException(
-                    "Insufficient stock: available=" + value + ", requested=" + quantity);
+        int newValue = this.value - quantity;
+        if (newValue < 0) {
+            throw new IllegalArgumentException("Cannot decrement stock below zero. Current: " + this.value + ", requested: " + quantity);
         }
-        return new Stock(value - quantity);
+        return new Stock(newValue);
     }
 
     public boolean hasAvailable(int required) {

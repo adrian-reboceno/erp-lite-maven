@@ -17,7 +17,6 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 public class Product extends AggregateRoot<ProductId> {
 
-    private ProductId id;
     private SKU sku;
     private ProductName name;
     private String description;
@@ -109,7 +108,7 @@ public class Product extends AggregateRoot<ProductId> {
     }
 
     public void deactivate() {
-        if (!this.active) throw new IllegalStateException("Product is already inactive");
+        if (!this.active) throw new IllegalStateException("Product is already deactivated");
         this.active = false;
         this.auditInfo = auditInfo.updateTimestamp();
         registerEvent(new ProductDeactivated(id, Instant.now()));
@@ -123,13 +122,15 @@ public class Product extends AggregateRoot<ProductId> {
     }
 
     public boolean hasAvailableStock(int requiredQuantity) {
-        return stock.hasAvailable(requiredQuantity);
+        return this.active && this.stock.hasAvailable(requiredQuantity);
     }
 
     private static void validatePrice(Money price) {
-        if (price == null) throw new IllegalArgumentException("Price cannot be null");
+        if (price == null) {
+            throw new IllegalArgumentException("Price cannot be null");
+        }
         if (price.amount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Price must be greater than 0, got: " + price.amount());
+            throw new IllegalArgumentException("Price must be greater than 0");
         }
     }
 }
