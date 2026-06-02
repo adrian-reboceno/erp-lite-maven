@@ -22,11 +22,11 @@ public abstract class Entity<ID> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Entity<?> entity = (Entity<?>) o;
-        return Objects.equals(getId(), entity.getId());
+        return Objects.equals(id, entity.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(id);
     }
 }

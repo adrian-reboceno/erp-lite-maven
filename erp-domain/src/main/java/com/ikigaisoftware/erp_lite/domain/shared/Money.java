@@ -11,12 +11,12 @@ public record Money(BigDecimal amount, Currency currency) {
             throw new IllegalArgumentException("Amount cannot be null");
         }
         if (amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Amount cannot be negative, got: " + amount);
+            throw new IllegalArgumentException("Amount cannot be negative");
         }
         if (currency == null) {
             throw new IllegalArgumentException("Currency cannot be null");
         }
-
+        // Scale to 2 decimal places for consistency
         amount = amount.setScale(2, RoundingMode.HALF_UP);
     }
 
@@ -32,33 +32,29 @@ public record Money(BigDecimal amount, Currency currency) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException("Cannot add money with different currencies: " + this.currency + " and " + other.currency);
         }
-        return new Money(amount.add(other.amount), currency);
+        return new Money(this.amount.add(other.amount), this.currency);
     }
 
     public Money subtract(Money other) {
         if (!this.currency.equals(other.currency)) {
             throw new IllegalArgumentException("Cannot subtract money with different currencies: " + this.currency + " and " + other.currency);
         }
-        BigDecimal result = amount.subtract(other.amount);
+        BigDecimal result = this.amount.subtract(other.amount);
         if (result.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Subtraction would result in negative amount");
+            throw new IllegalArgumentException("Subtraction result cannot be negative");
         }
         return new Money(result, this.currency);
     }
 
     public Money multiply(int multiplier) {
-        if (multiplier < 0) throw new IllegalArgumentException("Multiplier cannot be negative");
+        if (multiplier < 0) {
+            throw new IllegalArgumentException("Multiplier cannot be negative");
+        }
         return new Money(this.amount.multiply(BigDecimal.valueOf(multiplier)), this.currency);
     }
 
     public Money multiply(Quantity quantity) {
         return this.multiply(quantity.value());
-    }
-    private void requireSameCurrency(Money other) {
-        if (!currency.equals(other.currency)) {
-            throw new IllegalArgumentException(
-                    "Cannot operate on Money with different currencies: " + currency + " vs " + other.currency);
-        }
     }
 
     @Override

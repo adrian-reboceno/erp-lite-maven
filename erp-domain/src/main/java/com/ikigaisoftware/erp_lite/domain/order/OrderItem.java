@@ -17,7 +17,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Getter
 public class OrderItem extends Entity<OrderItemId> {
 
-    private OrderItemId id;
+
     private ProductId productReference;
     private String productName;
     private Quantity quantity;
@@ -35,15 +35,16 @@ public class OrderItem extends Entity<OrderItemId> {
         if (quantity == null) {
             throw new IllegalArgumentException("Quantity cannot be null");
         }
-        if (!product.isActive()){
-            throw new IllegalStateException("Cannot order inactive product: " + product.getSku().value());
+        if (!product.isActive()) {
+            throw new IllegalArgumentException("Cannot create order item for inactive product: " + product.getSku().value());
         }
 
 
         if (!product.hasAvailableStock(quantity.value())) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     "Insufficient stock for product " + product.getSku().value() +
-                    ": available=" + product.getStock().value() + ", requested=" + quantity.value());
+                            ". Required: " + quantity.value() + ", Available: " + product.getStock().value()
+            );
         }
 
         Money unitPrice = product.getPrice();

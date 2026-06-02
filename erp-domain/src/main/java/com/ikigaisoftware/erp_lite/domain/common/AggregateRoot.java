@@ -13,7 +13,7 @@ public abstract class AggregateRoot<ID> extends Entity<ID> {
     }
 
     protected void registerEvent(DomainEvent event) {
-        if(event == null){
+        if (event != null) {
             this.domainEvents.add(event);
         }
 
