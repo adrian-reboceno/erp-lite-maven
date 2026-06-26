@@ -2,7 +2,7 @@ package com.ikigaisoftware.erp_lite.infrastructure.persistence.rest.adapters;
 
 
 import com.ikigaisoftware.erp_lite.domain.customer.CustomerInfo;
-import com.ikigaisoftware.erp_lite.domain.customer.CustomerProviderService;
+import com.ikigaisoftware.erp_lite.domain.ports.CustomerProviderService;
 import com.ikigaisoftware.erp_lite.infrastructure.persistence.rest.dtos.UserDTO;
 import com.ikigaisoftware.erp_lite.infrastructure.persistence.rest.mappers.CustomerMapper;
 import com.ikigaisoftware.erp_lite.infrastructure.persistence.rest.models.JsonplaceholderConfigModel;
